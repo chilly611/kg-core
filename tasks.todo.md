@@ -1,14 +1,15 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: dogfood + merge `rebuild/ledger-journey-port`** (CODE-E — script in the PR).
-- [ ] **Founder after merge: Vercel project for kg-core?** (your action — fresh token, your terminal).
+- [ ] **Founder: merge `infra/vercel-standup`, then run** `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — one command: creates the `kg-core` Vercel project (scope `the-knowledge-gardens`), pushes the 4 kg-core-dev env vars, deploys `origin/main`, curl-verifies. Rerun after every merge (no auto-deploy while the dashboard is locked out). Runbook: `docs/vercel.md`.
+- [x] ~~Founder: dogfood + merge `rebuild/ledger-journey-port`~~ merged as PR #3 (`950a328`).
 
 ## NEXT
 - [ ] **CODE-D: module slots** — fill the gated Journey/Budget rails stubbed in the detail rail.
 - [ ] Founder: add ANTHROPIC_API_KEY (.env.local) → NL capture upgrades from heuristic to Claude; add GOOGLE_PLACES_KEY → type-ahead replaces the manual-fields fallback. Both legs are code-complete but unexercised.
 - [ ] Rubicon queue surface: draft contact_types exist in the DB (status='draft') — needs an operator review UI (promote/delete).
-- [ ] Founder: provide the new dev Supabase project ref (NEVER `vlezoyalutexenbnzzui`); then `supabase link` + `db push` from a branch and point DATABASE_URL at its connection string.
+- [x] ~~Founder: provide the new dev Supabase project ref~~ done 2026-07-02: `eyvzjofjwbxmryzupfsy` (kg-core-dev, us-west-1); migrations + seed applied via psql over the session pooler, SQL tests green hosted, `.env.local` points at it.
+- [ ] After the Auth0 tenant lands: add `AUTH0_*` (+ `APP_BASE_URL`) to `scripts/vercel-standup.sh`'s env list and redeploy.
 - [x] ~~CODE-B grid workspace~~ merged as PR #1.
 - [ ] Auth0 wiring: forward the Auth0 access token as the Supabase JWT; verify `current_client_id()` resolves against the dev project.
 - [ ] Google Places address normalization behind a seam (raw_input → normalized/place_id).
