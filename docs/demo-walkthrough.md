@@ -9,18 +9,17 @@ The live demo runs **locally against the seeded fixture** — full loop, no cred
 
 ---
 
-## Prep — five minutes, before anyone joins
+## Prep — one command, from any directory
 
 ```sh
-cd ~/Developer/kg-core
-git checkout main && git pull
-scripts/db-dev.sh --reset          # local Postgres, pristine Harborline fixture
-DEV_BYPASS=true npm run dev        # http://localhost:3000/workspace
+bash ~/Developer/kg-core/scripts/demo.sh --reset
 ```
 
-You are now the fixture admin of **Harborline Property Management** (fake, Ryan-shaped: 8 projects, 12 contacts, 2 groups, a lapsed lease, a dream project with no street). Keep a second browser tab on <https://kgcore-eight.vercel.app> for the close, and this file open for the beats.
+Then open **http://localhost:3000/workspace**. That's it — the script stops any stale dev server, brings up the seeded local Postgres, resets to the pristine fixture, and starts the app signed in as the fixture admin of **Harborline Property Management** (fake, Ryan-shaped: 8 projects, 12 contacts, 2 groups, a lapsed lease, a dream project with no street).
 
-If anything looks off, `scripts/db-dev.sh --reset` restores the pristine fixture in seconds — that safety is itself demo-worthy.
+Only prerequisite: the `~/Developer/kg-core` checkout is on `main` and current (`git -C ~/Developer/kg-core checkout main && git -C ~/Developer/kg-core pull`).
+
+Keep a second browser tab on <https://kgcore-eight.vercel.app> for the close, and this file open for the beats. If anything looks off mid-demo, rerun the same command — pristine fixture in seconds, and that safety is itself demo-worthy.
 
 ---
 
@@ -63,13 +62,13 @@ Scrub the Journey slot: moments from the events stream, spans from relationship 
 *Say: "The timeline is generated from data — events and dated relationships — not from hardcoded stages. Same engine, any category."*
 
 **9. The role lens — the risk story's money shot. [R]**
-Restart the dev server as the read-only-without-budgets user:
+Flip to the read-only-without-budgets user (one command, keeps the data):
 
 ```sh
-DEV_BYPASS=true DEV_BYPASS_SUB="auth0|harborline-readonly" npm run dev
+bash ~/Developer/kg-core/scripts/demo.sh --as readonly
 ```
 
-Reload the same project: the Budget slot, the money moments in the journey, and the gated agreement are gone.
+Reload the same project: the Budget slot, the money moments in the journey, and the gated agreement are gone. (`--as admin` flips back.)
 *Say: "Same project, different grant. And this isn't the UI hiding things — the rows never leave Postgres. Row-level security is on every table and proven by the SQL test suite. When we ran the lens pass, it caught a real leak — money surfacing in the journey for budget-less grants — and the gate was fixed before merge. The tests are how we know, not how we hope."*
 
 **10. The hosted close — the locked front door. [R]**
