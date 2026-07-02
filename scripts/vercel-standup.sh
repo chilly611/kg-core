@@ -6,8 +6,8 @@
 # This script is the whole stand-up AND the redeploy path — auto-deploy on merge
 # is unavailable without the dashboard, so rerun it after every merge to main.
 #
-#   VERCEL_TOKEN=<paste> scripts/vercel-standup.sh            # deploy production
-#   VERCEL_TOKEN=<paste> scripts/vercel-standup.sh --preview  # preview deploy only
+#   VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh            # deploy production
+#   VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh --preview  # preview deploy only
 #
 # What it does, in order:
 #   1. Reads the four runtime env values out of .env.local (the only place
@@ -39,14 +39,35 @@ MODE="prod"
 [ "${1:-}" = "--preview" ] && MODE="preview"
 
 [ -n "${VERCEL_TOKEN:-}" ] || {
-  echo "VERCEL_TOKEN is required. Paste it inline:" >&2
-  echo "  VERCEL_TOKEN=<token> scripts/vercel-standup.sh" >&2
+  echo "VERCEL_TOKEN is required. Paste it inline (bare token, no brackets or quotes needed):" >&2
+  echo "  VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh" >&2
   exit 1
 }
+case "$VERCEL_TOKEN" in
+  *"<"*|*">"*)
+    echo "VERCEL_TOKEN contains < or > — those were placeholder brackets in the docs." >&2
+    echo "Paste the bare token: VERCEL_TOKEN=cp_xxxx scripts/vercel-standup.sh" >&2
+    echo "(In zsh, an unquoted < also silently redirects — part of the token may have been eaten.)" >&2
+    exit 1 ;;
+esac
 [ -f "$ENV_FILE" ] || { echo "$ENV_FILE not found — fill it from .env.example first." >&2; exit 1; }
 
 vc() { npx --yes vercel@latest "$@" --token "$VERCEL_TOKEN"; }
 env_val() { sed -n "s/^$1=//p" "$ENV_FILE" | head -n 1; }
+
+# Fail fast on auth problems, with errors that name the actual fix.
+WHO="$(vc whoami 2>/dev/null | tail -n 1)" || true
+[ -n "$WHO" ] || {
+  echo "Vercel rejected the token (whoami failed) — it is invalid, expired, or incomplete." >&2
+  echo "Re-copy it from Account Settings -> Tokens (or mint a new one) and paste it bare." >&2
+  exit 1
+}
+echo "Token OK — authenticated as: $WHO"
+vc projects ls --scope "$SCOPE" >/dev/null 2>&1 || {
+  echo "Token works but cannot access team '$SCOPE'." >&2
+  echo "When creating the token, set Scope to 'Full Account' (or one covering $SCOPE), then retry." >&2
+  exit 1
+}
 
 # Fail fast on env problems before touching the network. Values stay out of logs.
 for var in $ENV_VARS; do

@@ -9,8 +9,8 @@
 
 ## Stand up / redeploy (same command)
 ```sh
-VERCEL_TOKEN=<paste> scripts/vercel-standup.sh            # production
-VERCEL_TOKEN=<paste> scripts/vercel-standup.sh --preview  # preview only
+VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh            # production
+VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh --preview  # preview only
 ```
 - Deploys a fresh snapshot of **`origin/main`**, never the working tree.
 - **Merges do not auto-deploy.** Git integration needs the dashboard, which is unavailable — after every merge to main, rerun the script or prod stays stale.

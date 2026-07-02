@@ -1,7 +1,8 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: merge `infra/vercel-standup`, then run** `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — one command: creates the `kg-core` Vercel project (scope `the-knowledge-gardens`), pushes the 4 kg-core-dev env vars, deploys `origin/main`, curl-verifies. Rerun after every merge (no auto-deploy while the dashboard is locked out). Runbook: `docs/vercel.md`.
+- [ ] **Founder: valid Vercel token, then the stand-up runs itself.** First token was rejected by Vercel (invalid/incomplete — see session log 2026-07-02). Mint at Account Settings → Tokens, **Scope: Full Account** (must cover `the-knowledge-gardens`), then `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` from repo root on main (bare token — no `<>`), or paste the token into a Claude session. Script pre-flights the token and names the fix if it's wrong. Runbook: `docs/vercel.md`.
+- [x] ~~Merge `infra/vercel-standup`~~ merged as PR #4 (`f962447`).
 - [x] ~~Founder: dogfood + merge `rebuild/ledger-journey-port`~~ merged as PR #3 (`950a328`).
 
 ## NEXT

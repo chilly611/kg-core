@@ -2,11 +2,17 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **Vercel stand-up is one command away.** Branch `infra/vercel-standup` adds `scripts/vercel-standup.sh` + `docs/vercel.md`. Founder: merge, then `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — creates project `kg-core` under `the-knowledge-gardens`, pushes the four kg-core-dev env vars (never `DEV_BYPASS`), deploys `origin/main`, verifies. **Merges never auto-deploy** (dashboard locked out) — rerun the script to ship.
+- **Vercel stand-up blocked on a valid token.** Stand-up script merged (PR #4, `f962447`); first run 2026-07-02 failed: the pasted token was rejected by Vercel as invalid (`whoami` fails). Likely a mangled paste — the docs' old `<paste>` placeholder made zsh eat part of the token as a redirect — or a token that isn't a Vercel API token / lacks team scope. Founder: mint/re-copy at vercel.com → Account Settings → Tokens with **Scope: Full Account** (must cover `the-knowledge-gardens`), then run `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (bare token, no brackets) or paste it into a Claude session. Script now fast-fails with named fixes on bad/under-scoped tokens.
 - CODE-E merged (PR #3, `950a328`). Dev Supabase `eyvzjofjwbxmryzupfsy` live: migrations + seed applied hosted, SQL tests green over the session pooler (2026-07-02 session).
 - Deployed posture until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
 
 ---
+
+## 2026-07-02 — First stand-up run: zsh placeholder trap + invalid token (Claude Code, autonomous)
+- Founder ran `VERCEL_TOKEN=<cp_…` in zsh — the literal `<` from the docs' `VERCEL_TOKEN=<paste>` placeholder is a redirect in zsh, so the shell tried to open the token as a file and the script never ran. Docs placeholder was mine; trap fixed everywhere (`PASTE_TOKEN_HERE`, no angle brackets) and the script now refuses tokens containing `<`/`>` with an explanation.
+- Reran the stand-up in-session with the pasted token: `vercel whoami` → "token is not valid". The earlier "You do not have access to the specified account" on `link --scope the-knowledge-gardens` was the same auth failure surfacing through scope resolution. So: token invalid/expired/incomplete (possibly characters lost around the `<`), or not a Vercel API token.
+- Hardened `scripts/vercel-standup.sh` to fail fast pre-flight: bracket check → `whoami` (invalid-token message) → `projects ls --scope the-knowledge-gardens` (under-scoped-token message naming the Full Account fix). No more confusing scope errors as the first symptom.
+- Open question for founder: if this token was minted today, dashboard access may be restored — that would re-enable git auto-deploy and end the paste-per-session era; worth confirming.
 
 ## 2026-07-02 — Vercel stand-up scripted; deploy is founder-token-gated (Claude Code, autonomous)
 - Task: "stand up Vercel for kg-core." The token is pasted per session (never persisted — see bkg deploy rules) and no token was provided this session, so the authenticated calls can't run here. Everything up to them is done and verified; the stand-up is now one paste-and-run.
