@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
+import { QuickCapture } from "@/components/intake/QuickCapture";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -344,13 +346,24 @@ export function Workspace() {
   return (
     <div className="flex h-screen flex-col">
       {/* Masthead */}
-      <header className="flex items-baseline justify-between border-b border-vellum bg-parchment px-6 py-3">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-vellum bg-parchment px-6 py-3">
         <div className="flex items-baseline gap-4">
           <h1 className="h-display text-lg tracking-wide">
             Knowledge Gardens
           </h1>
           <span className="h-label text-gold">Workspace</span>
+          <Link href="/workspace/import" className="h-label text-teal">
+            Import
+          </Link>
         </div>
+        <QuickCapture
+          onCommitted={async (r) => {
+            say(
+              `${r.records_created + r.records_updated} records captured — logged.`
+            );
+            await refreshAll();
+          }}
+        />
         <div className="h-label text-ink-soft">
           {me ? `${me.display_name} · ${me.client_name}` : "…"}
         </div>

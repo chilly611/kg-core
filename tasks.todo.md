@@ -1,11 +1,14 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: dogfood + merge `rebuild/grid-workspace`** (CODE-B grid workspace — 60-second script in the PR description).
+- [ ] **Founder: dogfood + merge `rebuild/intake-v1`** (CODE-C intake — 90-second script in the PR description).
 
 ## NEXT
 - [ ] **CODE-D: module slots** — fill the gated Journey/Budget rails stubbed in the detail rail.
+- [ ] Founder: add ANTHROPIC_API_KEY (.env.local) → NL capture upgrades from heuristic to Claude; add GOOGLE_PLACES_KEY → type-ahead replaces the manual-fields fallback. Both legs are code-complete but unexercised.
+- [ ] Rubicon queue surface: draft contact_types exist in the DB (status='draft') — needs an operator review UI (promote/delete).
 - [ ] Founder: provide the new dev Supabase project ref (NEVER `vlezoyalutexenbnzzui`); then `supabase link` + `db push` from a branch and point DATABASE_URL at its connection string.
+- [x] ~~CODE-B grid workspace~~ merged as PR #1.
 - [ ] Auth0 wiring: forward the Auth0 access token as the Supabase JWT; verify `current_client_id()` resolves against the dev project.
 - [ ] Google Places address normalization behind a seam (raw_input → normalized/place_id).
 
