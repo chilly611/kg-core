@@ -1,7 +1,9 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: dogfood the live app in a browser — <https://kgcore-eight.vercel.app>** (expect: workspace shell renders, grids empty, APIs 401 until Auth0). Redeploy after any merge: `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh`. Runbook incl. domain traps: `docs/vercel.md`.
+- [ ] **Founder: walk John & Rich through the build.** Send <https://kgcore-walkthrough.vercel.app>, then run the 15-minute live demo per `docs/demo-walkthrough.md` (local fixture, ten beats, role-lens flip, hosted fail-closed close). Prep is two commands.
+- [ ] **Founder: Auth0 tenant** — the unlock for a signed-in HOSTED demo (today the live URL correctly shows "Not signed in"). Then add `AUTH0_*` + `APP_BASE_URL` to `scripts/vercel-standup.sh` env list and rerun.
+- [ ] Redeploy after any merge: `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh`. Runbook incl. domain traps: `docs/vercel.md`.
 - [ ] Founder: want a custom domain (e.g. `core.theknowledgegardens.com`) instead of `kgcore-eight.vercel.app`? Bare `kg-core.vercel.app`/`kgcore.vercel.app` are unavailable (held elsewhere; see runbook).
 - [x] ~~Vercel stand-up~~ LIVE 2026-07-02: project `kgcore` @ `the-knowledge-gardens`, `origin/main` `f962447`, env pushed, verified 200/401.
 - [x] ~~Merge `infra/vercel-standup`~~ merged as PR #4 (`f962447`).

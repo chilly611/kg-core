@@ -2,12 +2,19 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **kg-core is LIVE: <https://kgcore-eight.vercel.app>** (Vercel project `kgcore` @ `the-knowledge-gardens`, deployed `origin/main` `f962447`, all four kg-core-dev env vars on production+preview). Verified: `/` → 307 → `/workspace` 200 ("Knowledge Gardens — Workspace"), `/api/me` 401 (intended pre-Auth0 posture). Founder: dogfood it in a browser. Redeploy after any merge = `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (no auto-deploy — dashboard still locked out, 2FA passkey).
+- **Demo kit for John & Rich is ready.** Shareable overview: <https://kgcore-walkthrough.vercel.app> (Herbarium walkthrough of model → surfaces → receipts, real role-lens screenshots embedded; also `docs/walkthrough.html`). Presenter script: `docs/demo-walkthrough.md` — 15-minute local live demo (fixture, `DEV_BYPASS`, ten beats with talk track + Q&A ammo). The hosted URL's "Not signed in" card is the closing beat: fail-closed by design.
+- **kg-core is LIVE: <https://kgcore-eight.vercel.app>** (Vercel project `kgcore` @ `the-knowledge-gardens`, deployed `origin/main` `f962447`, all four kg-core-dev env vars on production+preview). Verified: `/` → 307 → `/workspace` 200 ("Knowledge Gardens — Workspace"), `/api/me` 401 (intended pre-Auth0 posture). Redeploy after any merge = `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (no auto-deploy — dashboard still locked out, 2FA passkey).
 - The URL is `kgcore-eight` because bare `kg-core.vercel.app`/`kgcore.vercel.app` are held elsewhere globally and Vercel's domains API records them as yours anyway while the edge 404s them — full traps writeup in `docs/vercel.md`. A custom domain (e.g. `core.theknowledgegardens.com`) sidesteps this whenever wanted.
 - CODE-E merged (PR #3, `950a328`). Dev Supabase `eyvzjofjwbxmryzupfsy` live: migrations + seed applied hosted, SQL tests green over the session pooler (2026-07-02 session).
 - Until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
 
 ---
+
+## 2026-07-02 — Demo kit: walkthrough page + presenter runbook (Claude Code, autonomous)
+- Founder hit the live URL and saw only the "Not signed in" card — correct fail-closed posture, but nothing to show John and Rich. Ask: an easy walkthrough proving we built what the 06-30 meeting architected (frictionless / scalable / user-friendly / risk-free).
+- **Shareable page** <https://kgcore-walkthrough.vercel.app> (own Vercel project, deploy-first pattern; copy at `docs/walkthrough.html`): Herbarium-styled tour — the entity model as Rich drew it, the four merged lanes, a receipts wall (14/14 hosted SQL tests, Σdebit=Σcredit as a DB constraint, fail-closed 401s, prod-ref hard refusal, events provenance, idempotent intake), the real CODE-E role-lens screenshots embedded, the four claims made testable, and an honest gates strip (G2 waits on Ryan's spreadsheet).
+- **Presenter runbook** `docs/demo-walkthrough.md`: 5-minute prep (`scripts/db-dev.sh --reset` + `DEV_BYPASS=true npm run dev`), ten 90-second beats with talk track (chips → grids → bulk reassign → rail → xlsx import + idempotence → vcf/NL capture → ledger reversal → journey scrub → role-lens flip via `DEV_BYPASS_SUB="auth0|harborline-readonly"` → hosted fail-closed close), honest-status slide, Q&A ammo.
+- Framing shift: the "Not signed in" card is presented as the security model working — the demo runs locally on the fixture; the hosted signed-in demo arrives with the Auth0 tenant.
 
 ## 2026-07-02 — Stand-up round 2: LIVE at kgcore-eight.vercel.app (Claude Code, autonomous)
 - Real token arrived (`vcp_…` — first paste had lost the leading `v` to the zsh `<` redirect). `whoami` = `chillydahlgren`, team visible. Dashboard confirmed still locked (founder screenshot: passkey 2FA wall) — paste-per-session continues.
