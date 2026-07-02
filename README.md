@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# kg-core
 
-## Getting Started
+The category-agnostic record engine for The Knowledge Gardens. Next.js (App Router) + TypeScript + Tailwind v4 + Supabase (Postgres/RLS) + Auth0.
 
-First, run the development server:
+Read `docs/core-data-model.md` for the model, the category rule, and the Rubicon Rule. Session/lane rules live in `CLAUDE.md`.
+
+## Quickstart
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in when a dev Supabase project exists
+
+# Verify the database layer (no Docker needed — spins a throwaway local Postgres):
+scripts/db-test.sh
+
+# Run the app:
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`scripts/db-test.sh` needs Postgres 15+ binaries on PATH, or `PG_BIN=/path/to/pg/bin`. A no-sudo install that works on this Mac (Homebrew is broken):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+curl -Ls https://micro.mamba.pm/api/micromamba/osx-arm64/latest | tar -xj bin/micromamba
+./bin/micromamba create -y -p ~/Developer/kg-core-tools/pgenv -c conda-forge postgresql=16
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+With Docker you can use the Supabase stack instead: `npx supabase start && npx supabase db reset` (applies `supabase/migrations/` + `supabase/seed.sql`), then run each file in `supabase/tests/` with `psql -v ON_ERROR_STOP=1 -f`.
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
+- `supabase/migrations/` — one file per concern, heavily commented. RLS on every table.
+- `supabase/seed.sql` — Harborline fixture (fake, Ryan-shaped) + a second client for isolation tests.
+- `supabase/tests/` — SQL assertions: RLS isolation, time-bounded contacts, count reconciliation, module gating.
+- `lib/supabase/` — browser + server clients (@supabase/ssr).
+- `docs/` — data model, session log.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Hard rule
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No config in this repo may ever point at Supabase project `vlezoyalutexenbnzzui` (shared production of the frozen BKG app). kg-core gets its own project.

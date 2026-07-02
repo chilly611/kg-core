@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local db harness (throwaway cluster + logs)
+.local/
+
+# supabase local artifacts
+supabase/.temp/
+!.env.example
