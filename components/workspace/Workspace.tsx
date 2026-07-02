@@ -150,6 +150,9 @@ export function Workspace() {
         return refreshAll();
       })
       .catch((e) => setAuthError(e.message));
+    // Deep link: /workspace?project=<id> opens that project's rail.
+    const wanted = new URLSearchParams(window.location.search).get("project");
+    if (wanted) setRailProjectId(wanted);
   }, [refreshAll]);
 
   const say = useCallback((message: string) => {
