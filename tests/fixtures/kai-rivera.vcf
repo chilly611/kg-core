@@ -1,0 +1,14 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 19.0//EN
+N:Rivera;Kai;;;
+FN:Kai Rivera
+ORG:Rivera & Daughters Electric;
+TITLE:Master Electrician
+TEL;type=CELL;type=VOICE;type=pref:+1 (415) 555-0299
+EMAIL;type=INTERNET;type=WORK;type=pref:kai@riveraelectric.example
+item1.ADR;type=WORK;type=pref:;;88 Liberty Ship Way;Sausalito;CA;94965;US
+item1.X-ABLabel:Shop
+BDAY:1987-03-14
+NOTE:Licensed C-10. Prefers early texts.
+END:VCARD

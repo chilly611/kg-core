@@ -1,0 +1,9 @@
+﻿group_name,group_kind,project_name,street,city,region,postal,country,contact_name,contact_type,contact_phone,contact_email,preferred_contact_method,lease_start,lease_end,notes
+Cypress Court,multi_family,Cypress Court Unit A,410 Cypress Ct Unit A,Larkspur,CA,94939,US,Tomas Ibarra,lessee,+1-415-555-0201,tomas.ibarra@example.com,email,2026-02-01,2027-01-31,
+Cypress Court,multi_family,Cypress Court Unit B,410 Cypress Ct Unit B,Larkspur,CA,94939,US,Renee Alvarez,lessee,+1-415-555-0202,renee.alvarez@example.com,sms,2025-09-01,2026-08-31,
+Cypress Court,multi_family,Cypress Court Unit C,410 Cypress Ct Unit C,Larkspur,CA,94939,US,Moira Chen,lessee,+1-415-555-0203,moira.chen@example.com,email,2025-06-01,2026-05-31,moved out end of May
+Cypress Court,multi_family,Cypress Court Roof Deck,410 Cypress Ct,Larkspur,CA,94939,US,Ridgeway Roofing,vendor,+1-415-555-0204,bids@ridgewayroofing.example,phone,,,deck rebuild bid due
+Gate Five Annex,commercial,Gate Five Suite 120,120 Gate Five Rd,Sausalito,CA,94965,US,Blue Slip Design LLC,lessee,+1-415-555-0205,office@blueslipdesign.example,email,2026-01-15,2028-01-14,
+Gate Five Annex,commercial,Gate Five Suite 200,200 Gate Five Rd,Sausalito,CA,94965,US,Ridgeway Roofing,vendor,+1-415-555-0204,bids@ridgewayroofing.example,phone,,,shared vendor with Cypress
+Gate Five Annex,commercial,Gate Five Suite 200,200 Gate Five Rd,Sausalito,CA,94965,US,Harbormaster Office,harbormaster,+1-415-555-0206,,phone,,,port liaison
+,,Skyline Deck concept,,Mill Valley,CA,,US,,,,,,,,owner sketching a hillside deck program

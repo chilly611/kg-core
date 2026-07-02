@@ -2,11 +2,23 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **CODE-B grid workspace built** on `rebuild/grid-workspace` — PR open, founder dogfoods before merge.
-- Next lane after merge: **CODE-D module slots** (Journey/Budget rails are stubbed and gated, waiting).
+- **CODE-C intake built** on `rebuild/intake-v1` — PR open, founder dogfoods before merge (90-second script in the PR).
+- Next lane after merge: **CODE-D module slots** (Journey/Budget rails stubbed and gated since CODE-B).
 - Remote Supabase: **still not linked** (LOCAL ONLY). Founder provides the new dev project ref before any `supabase link` / `db push`.
 
 ---
+
+## 2026-07-01 (late) — CODE-C intake v1 (Claude Code, autonomous)
+- Branch `rebuild/intake-v1` (CODE-B merged as PR #1). Four intake paths, ONE review pattern: every path produces a Bundle → `planBundle` diffs it against the RLS-scoped DB into a color-coded Proposal → the same preview grid → `commitProposal` applies atomically. Nothing auto-commits.
+- **Template import** (`/workspace/import`): .xlsx/.csv (SheetJS), header aliases, full tree build with dedupe (groups by name; addresses by place_id/street+city+postal; contacts by email>phone>name). Files never rejected — bad cells are inline-fixable issues that re-plan on edit.
+- **VCF**: iPhone cards parse; unknown fields land in `contacts.attrs.vcf` (new `attrs` column, Rubicon-reviewed: it's the generic extension point, not a category column).
+- **Places single add**: server-side proxy keeps the key private; keyless fallback = manual fields + amber "normalization pending" chip (`normalized` stays NULL).
+- **NL quick capture**: header one-liner → `/api/capture` → Claude (tool-forced JSON → ImportRow[], same builder as template) or a labeled heuristic when no ANTHROPIC_API_KEY. Never auto-commits.
+- **Rubicon queue**: unknown contact_type → `contact_types` row with new `status='draft'` (authenticated may INSERT drafts only; published vocabulary stays operator-managed).
+- **Reconciliation + leverage**: expected_counts editor on the import screen (chips live-update; over-import shows amber "N over"); every commit logs `import.committed` {source, records_created, records_updated, user_active_seconds} + duration_ms; UI shows "29 records in 11s of your time."
+- Verified: fixture spreadsheet (incl. no-street dream project + already-ended lease → effective inactive) imports clean; **re-import = 29 unchanged / 0 writes (idempotent)**; VCF attrs round-trip; NL sentence → preview → commit in the browser; events ledger correct in psql; zero console errors; SQL suite green with the new migration.
+- Fixtures: `tests/fixtures/harborline-import.{xlsx,csv}`, `kai-rivera.vcf` (regenerate: `node scripts/make-fixtures.mjs`). `docs/import-template.md` authored as the canonical column spec (Cowork had not delivered one).
+- Assumption flagged: no ANTHROPIC key or GOOGLE_PLACES key on this machine — Claude leg and live Places leg are code-complete but unexercised until founder adds keys.
 
 ## 2026-07-01 (evening) — CODE-B grid workspace (Claude Code, autonomous)
 - Branch `rebuild/grid-workspace`. `/workspace` with four ag-Grid Community (MIT) grids: Projects · Contacts · Groups · Users, themed Herbarium via the ag-Grid Theming API (quartz blue dead; parchment/vellum/teal).
