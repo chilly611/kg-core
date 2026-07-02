@@ -2,11 +2,20 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- Foundation landed: schema (12 concerns), RLS, seed fixture, SQL test suite — all green locally.
-- Next lane: **CODE-B grid workspace** (see tasks.todo.md).
-- Remote Supabase: **not linked to anything yet** (LOCAL ONLY session). Founder provides the new dev project ref before any `supabase link` / `db push`.
+- **CODE-B grid workspace built** on `rebuild/grid-workspace` — PR open, founder dogfoods before merge.
+- Next lane after merge: **CODE-D module slots** (Journey/Budget rails are stubbed and gated, waiting).
+- Remote Supabase: **still not linked** (LOCAL ONLY). Founder provides the new dev project ref before any `supabase link` / `db push`.
 
 ---
+
+## 2026-07-01 (evening) — CODE-B grid workspace (Claude Code, autonomous)
+- Branch `rebuild/grid-workspace`. `/workspace` with four ag-Grid Community (MIT) grids: Projects · Contacts · Groups · Users, themed Herbarium via the ag-Grid Theming API (quartz blue dead; parchment/vellum/teal).
+- Data layer: Next route handlers over RLS-enforced Postgres (`lib/server/db.ts` — per-request `set local role authenticated` + `request.jwt.claims`, the exact mechanism the SQL tests prove). Same code will point at the dev Supabase project's connection string later. Auth: Auth0 SDK wired but dormant (no tenant); `DEV_BYPASS=true` maps the session to the fixture admin.
+- Reconciliation chips on every grid (sage when exact, amber-gold with the delta); seed + test 03 extended so groups (2) and users (3) reconcile alongside projects (8) and contacts (12).
+- Row quick actions (Detail rail, set inactive/active), inline edit (names, reach-by), filters (status default hides inactive; group; contact type), bulk bar (status + **bulk vendor reassign** — end-date N assignments and create replacements in one transaction).
+- Every mutation writes events (actor_type user/operator, duration_ms on bulk ops).
+- Verified in a real browser (Chrome): all four grids with fixture data, rail with address/contacts/documents/gated CODE-D slots, bulk reassign Bayline→Marin Electric across 3 projects end-to-end, events trail confirmed in psql, zero console errors, leave→return persists.
+- Local dev: `scripts/db-dev.sh` (persistent seeded cluster) + `DEV_BYPASS=true npm run dev`. Dev DB reset to pristine fixture for founder dogfood.
 
 ## 2026-07-01 — Foundation session (Claude Code, autonomous)
 - Scaffolded Next.js (App Router) + TS + Tailwind v4; added `@supabase/supabase-js`, `@supabase/ssr`, supabase CLI (npm dev dep); `supabase init`.

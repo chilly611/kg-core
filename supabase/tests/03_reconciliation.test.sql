@@ -21,6 +21,10 @@ begin
         select count(*) into v_actual from public.projects where client_id = r.client_id;
       when 'contacts' then
         select count(*) into v_actual from public.contacts where client_id = r.client_id;
+      when 'groups' then
+        select count(*) into v_actual from public.groups where client_id = r.client_id;
+      when 'users' then
+        select count(*) into v_actual from public.users where client_id = r.client_id;
       else
         raise exception 'FAIL: no reconciliation query for entity %', r.entity;
     end case;

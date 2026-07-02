@@ -249,7 +249,10 @@ insert into public.document_links (document_id, target_type, target_id) values
 -- ---------------------------------------------------------------- expected_counts
 insert into public.expected_counts (client_id, entity, expected, as_of) values
   ('c0000000-0000-4000-8000-000000000001', 'projects', 8,  current_date),
-  ('c0000000-0000-4000-8000-000000000001', 'contacts', 12, current_date);
+  ('c0000000-0000-4000-8000-000000000001', 'contacts', 12, current_date),
+  -- Added for the grid workspace: every tab shows a live reconciliation chip.
+  ('c0000000-0000-4000-8000-000000000001', 'groups',   2,  current_date),
+  ('c0000000-0000-4000-8000-000000000001', 'users',    3,  current_date);
 
 -- ---------------------------------------------------------------- events (actor variety)
 insert into public.events (client_id, actor_type, actor_id, verb, target_type, target_id, payload, duration_ms) values

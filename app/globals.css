@@ -1,26 +1,140 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Herbarium light system — LOCKED. Light backgrounds only.
+   Never dark themes, never #E8443A, never pure white pages.
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #faf3de;      /* page */
+  --parchment: #f2e9d2;  /* cards, grid body */
+  --vellum: #e8ddb8;     /* borders, wells, headers */
+  --teal: #3c7a8a;       /* primary actions, links */
+  --sage: #5e7a56;       /* good / active flags */
+  --gold: #7c6235;       /* accents, labels */
+  --rust: #a53a2d;       /* warnings / inactive flags */
+  --ink: #2c2416;        /* text */
+  --ink-soft: #5a4f3a;   /* secondary text */
+
+  --font-display: var(--font-archivo-black);
+  --font-body: var(--font-archivo);
+  --font-label: var(--font-space-mono);
+  --font-caption: var(--font-cormorant);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cream: var(--cream);
+  --color-parchment: var(--parchment);
+  --color-vellum: var(--vellum);
+  --color-teal: var(--teal);
+  --color-sage: var(--sage);
+  --color-gold: var(--gold);
+  --color-rust: var(--rust);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-space-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light only;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
 }
+
+/* ---------- shared chrome ---------- */
+
+.h-display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.h-label {
+  font-family: var(--font-label), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+}
+
+.h-caption {
+  font-family: var(--font-caption), serif;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Flag-motif status chips: pennant + Space Mono label. */
+.flag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.6rem 0.15rem 0.45rem;
+  border: 1px solid var(--vellum);
+  border-radius: 2px;
+  font-family: var(--font-label), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.625rem;
+  line-height: 1.4;
+  background: var(--parchment);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.flag-chip::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid currentColor;
+}
+.flag-chip.flag-good { color: var(--sage); border-color: var(--sage); }
+.flag-chip.flag-warn { color: var(--gold); border-color: var(--gold); }
+.flag-chip.flag-bad  { color: var(--rust); border-color: var(--rust); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 2px;
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  color: var(--cream);
+  font-family: var(--font-label), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: filter 120ms;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.btn-quiet {
+  background: transparent;
+  color: var(--teal);
+}
+.btn.btn-rust {
+  border-color: var(--rust);
+  background: transparent;
+  color: var(--rust);
+}
+
+.well {
+  background: var(--parchment);
+  border: 1px solid var(--vellum);
+  border-radius: 3px;
+}
+
+.field {
+  border: 1px solid var(--vellum);
+  border-radius: 2px;
+  background: var(--cream);
+  color: var(--ink);
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.8125rem;
+}
+.field:focus { outline: 2px solid var(--teal); outline-offset: -1px; }
