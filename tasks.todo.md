@@ -1,7 +1,9 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: valid Vercel token, then the stand-up runs itself.** First token was rejected by Vercel (invalid/incomplete — see session log 2026-07-02). Mint at Account Settings → Tokens, **Scope: Full Account** (must cover `the-knowledge-gardens`), then `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` from repo root on main (bare token — no `<>`), or paste the token into a Claude session. Script pre-flights the token and names the fix if it's wrong. Runbook: `docs/vercel.md`.
+- [ ] **Founder: dogfood the live app in a browser — <https://kgcore-eight.vercel.app>** (expect: workspace shell renders, grids empty, APIs 401 until Auth0). Redeploy after any merge: `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh`. Runbook incl. domain traps: `docs/vercel.md`.
+- [ ] Founder: want a custom domain (e.g. `core.theknowledgegardens.com`) instead of `kgcore-eight.vercel.app`? Bare `kg-core.vercel.app`/`kgcore.vercel.app` are unavailable (held elsewhere; see runbook).
+- [x] ~~Vercel stand-up~~ LIVE 2026-07-02: project `kgcore` @ `the-knowledge-gardens`, `origin/main` `f962447`, env pushed, verified 200/401.
 - [x] ~~Merge `infra/vercel-standup`~~ merged as PR #4 (`f962447`).
 - [x] ~~Founder: dogfood + merge `rebuild/ledger-journey-port`~~ merged as PR #3 (`950a328`).
 

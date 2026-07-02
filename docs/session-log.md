@@ -2,11 +2,19 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **Vercel stand-up blocked on a valid token.** Stand-up script merged (PR #4, `f962447`); first run 2026-07-02 failed: the pasted token was rejected by Vercel as invalid (`whoami` fails). Likely a mangled paste — the docs' old `<paste>` placeholder made zsh eat part of the token as a redirect — or a token that isn't a Vercel API token / lacks team scope. Founder: mint/re-copy at vercel.com → Account Settings → Tokens with **Scope: Full Account** (must cover `the-knowledge-gardens`), then run `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (bare token, no brackets) or paste it into a Claude session. Script now fast-fails with named fixes on bad/under-scoped tokens.
+- **kg-core is LIVE: <https://kgcore-eight.vercel.app>** (Vercel project `kgcore` @ `the-knowledge-gardens`, deployed `origin/main` `f962447`, all four kg-core-dev env vars on production+preview). Verified: `/` → 307 → `/workspace` 200 ("Knowledge Gardens — Workspace"), `/api/me` 401 (intended pre-Auth0 posture). Founder: dogfood it in a browser. Redeploy after any merge = `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (no auto-deploy — dashboard still locked out, 2FA passkey).
+- The URL is `kgcore-eight` because bare `kg-core.vercel.app`/`kgcore.vercel.app` are held elsewhere globally and Vercel's domains API records them as yours anyway while the edge 404s them — full traps writeup in `docs/vercel.md`. A custom domain (e.g. `core.theknowledgegardens.com`) sidesteps this whenever wanted.
 - CODE-E merged (PR #3, `950a328`). Dev Supabase `eyvzjofjwbxmryzupfsy` live: migrations + seed applied hosted, SQL tests green over the session pooler (2026-07-02 session).
-- Deployed posture until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
+- Until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
 
 ---
+
+## 2026-07-02 — Stand-up round 2: LIVE at kgcore-eight.vercel.app (Claude Code, autonomous)
+- Real token arrived (`vcp_…` — first paste had lost the leading `v` to the zsh `<` redirect). `whoami` = `chillydahlgren`, team visible. Dashboard confirmed still locked (founder screenshot: passkey 2FA wall) — paste-per-session continues.
+- Script ran clean end-to-end (project create → env ×8 → prod deploy READY)… and then the real saga: **every project domain 404'd at the edge while Vercel's control plane swore `aliasAssigned`, no `aliasError`, PROMOTED.** Generated/alias URLs routed (302 SSO) but project domains never bound. Domain rm/re-add, fresh deploys, delete+recreate under the same name — no fix (recreate made it worse: tombstoned hostnames).
+- **Canary isolation** (throwaway static project): fresh deploy-created project routed fine, its bare auto-domain served 200 → platform healthy, `project add`-created projects + externally-held bare names were the poison. `kg-core.vercel.app` and `kgcore.vercel.app` are held by other accounts globally; the domains API records them as yours (`verified:true`) anyway and the edge 404s forever.
+- **Fix:** recreate deploy-first (deploy from a dir named `kgcore` auto-creates the project and grants an honest domain — `kgcore-eight.vercel.app`), then rerun the stand-up script to push env + redeploy with env baked in. Verified live (200/401/title). Founder repo `.vercel/project.json` linked (`prj_T8ZO5IWGAHzzZfaC1ctgb1rJl6tk`). Canary + poisoned projects deleted; `kgcore` has exactly one domain.
+- Script updated: `PROJECT=kgcore`, real `PROD_ALIAS`, CLI-54 JSON stdout parsing, bootstrap-deploy-first rule documented in the header. Runbook gained a "vercel.app domain traps" section.
 
 ## 2026-07-02 — First stand-up run: zsh placeholder trap + invalid token (Claude Code, autonomous)
 - Founder ran `VERCEL_TOKEN=<cp_…` in zsh — the literal `<` from the docs' `VERCEL_TOKEN=<paste>` placeholder is a redirect in zsh, so the shell tried to open the token as a file and the script never ran. Docs placeholder was mine; trap fixed everywhere (`PASTE_TOKEN_HERE`, no angle brackets) and the script now refuses tokens containing `<`/`>` with an explanation.

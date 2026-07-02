@@ -23,12 +23,24 @@
 # Deployed posture with this env set: UI shell renders; every API returns 401
 # (no Auth0 tenant yet, DEV_BYPASS absent); document uploads go to the private
 # `documents` bucket on kg-core-dev. See docs/vercel.md.
+#
+# Hard-won platform truths (2026-07-02 stand-up):
+# - The project is named `kgcore` and its REAL production domain is
+#   kgcore-eight.vercel.app — auto-granted at first deploy. Bare names
+#   (kg-core.vercel.app, kgcore.vercel.app) are held elsewhere globally: the
+#   domains API will happily record them as yours (verified:true) and the edge
+#   will 404 them forever. Trust only the domain Vercel auto-grants at deploy.
+# - NEVER bootstrap a new project with `vercel project add` + link + deploy —
+#   that path produced projects whose hostnames never bound at the edge.
+#   Create new projects by deploying from a directory named for the project
+#   (deploy-creates-project), then rerun this script to push env + redeploy.
+# - Deleting + recreating a project under the SAME name inherits the breakage.
 
 set -euo pipefail
 
 SCOPE="the-knowledge-gardens"
-PROJECT="kg-core"
-PROD_ALIAS="https://kg-core.vercel.app"
+PROJECT="kgcore"
+PROD_ALIAS="https://kgcore-eight.vercel.app"
 ENV_VARS="NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY DATABASE_URL"
 FORBIDDEN_REF="vlezoyalutexenbnzzui"
 
@@ -96,10 +108,13 @@ for var in $ENV_VARS; do
 done
 
 if [ "$MODE" = "prod" ]; then
-  URL="$(vc deploy --prod --yes)"
+  DEPLOY_OUT="$(vc deploy --prod --yes)"
 else
-  URL="$(vc deploy --yes)"
+  DEPLOY_OUT="$(vc deploy --yes)"
 fi
+# CLI 54+ writes a JSON object to a non-TTY stdout; older CLIs print a bare URL.
+URL="$(printf '%s\n' "$DEPLOY_OUT" | sed -n 's/.*"url": *"\(https:[^"]*\)".*/\1/p' | head -n 1)"
+[ -n "$URL" ] || URL="$DEPLOY_OUT"
 echo "Deployment URL: $URL"
 
 mkdir -p "$REPO_ROOT/.vercel"
@@ -114,8 +129,10 @@ if [ "$MODE" = "prod" ]; then
   done
   echo "$PROD_ALIAS/workspace -> HTTP $code (expect 200; APIs 401 until Auth0)"
   if [ "$code" != "200" ]; then
-    echo "If the kg-core.vercel.app alias was taken globally, find the real one with:" >&2
-    echo "  npx vercel@latest inspect $URL --scope $SCOPE --token \$VERCEL_TOKEN" >&2
+    echo "Domain may still be propagating (first bind can take ~2 min)." >&2
+    echo "The authoritative domain list is:" >&2
+    echo "  curl -H \"Authorization: Bearer \$VERCEL_TOKEN\" \\" >&2
+    echo "    'https://api.vercel.com/v9/projects/$PROJECT/domains?slug=$SCOPE'" >&2
   fi
 else
   echo "Preview deployments have Vercel Authentication on by default — open in a browser."
