@@ -2,11 +2,21 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **CODE-C intake built** on `rebuild/intake-v1` — PR open, founder dogfoods before merge (90-second script in the PR).
-- Next lane after merge: **CODE-D module slots** (Journey/Budget rails stubbed and gated since CODE-B).
-- Remote Supabase: **still not linked** (LOCAL ONLY). Founder provides the new dev project ref before any `supabase link` / `db push`.
+- **CODE-E ledger/journey/documents port built** on `rebuild/ledger-journey-port` — PR open, founder dogfoods before merge.
+- After merge: founder decides whether to stand up the Vercel project for kg-core (fresh token, founder's terminal), and whether the dev Supabase project gets created (unlocks Storage + Realtime + Auth0 legs).
+- Remote Supabase: **still not linked** (LOCAL ONLY).
 
 ---
+
+## 2026-07-02 — CODE-E: BKG primitives ported onto the core model (Claude Code, autonomous)
+- **Ledger** ported from bkg `feat/one-loop-ledger` (61eff69): double-entry journal with the deferrable Σdebit=Σcredit constraint trigger, approved-COs-move-budget invariant, reversal-not-delete, `ledger_assert_reconcile` (raise before rendering a bad number). Adapted: public schema + client_id RLS keyed on core projects.id; cost codes are CLIENT VOCABULARY (`ledger_cost_codes`), not MasterFormat; rollup caches DROPPED (they existed only for Realtime broadcast — truth is the view; poll seam until hosted Supabase). Commitments/ETC/hash-chain deferred. Test 05: 8 assertions incl. unbalanced-write rejection + client isolation.
+- **Budget slot** (rail): ribbon essence — stable "spent / total" headline, headroom flag, per-code bars, pending-CO approve, post-expense, undo (reversal). Gated by module_visibility.budgets at THREE layers (rail wrapper, /financials `{gated:true}`, RLS on docs).
+- **Journey slot** (rail): time-machine CONCEPT rebuilt category-agnostic (bkg TimeMachine was THREE.js + hardcoded construction phases + prohibited red — not portable as-is). Scrubber shows as-of state; moments = events, spans = project_contacts windows, labels from data.
+- **Role-lens pass caught a real leak:** events carried money into the journey for budgets:false grants — journey endpoint now hides `ledger.*` moments behind the module gate. Lens pair committed: `docs/dogfood/code-e-lens-{admin,readonly}.png`.
+- **Documents:** real upload through a storage seam (`lib/server/storage.ts`: local disk now; Supabase Storage code-complete for when the dev project exists — never vlezoyalutexenbnzzui). Download re-selects the row under caller RLS (hidden row = 404). Uploads default-link to the project. Readonly download of a gated doc proven 404.
+- **Capture endpoint verdict:** bkg `feat/capture-endpoint` adds voice/photo→field-report→ledger behind a structurer seam. NOT folded: modalities are key-gated (Whisper/vision) and need media storage; our CODE-C text seam already implements the same pattern. Revisit when keys + storage land.
+- Deep link added: `/workspace?project=<id>` opens that project's rail.
+- Verified: change-a-variable live in the rail (approve CO → $153K→$163K headline, bars, flag all moved), 14/14 SQL assertions, build green, zero console errors. Dev DB reset pristine.
 
 ## 2026-07-01 (late) — CODE-C intake v1 (Claude Code, autonomous)
 - Branch `rebuild/intake-v1` (CODE-B merged as PR #1). Four intake paths, ONE review pattern: every path produces a Bundle → `planBundle` diffs it against the RLS-scoped DB into a color-coded Proposal → the same preview grid → `commitProposal` applies atomically. Nothing auto-commits.

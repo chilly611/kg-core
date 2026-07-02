@@ -254,6 +254,65 @@ insert into public.expected_counts (client_id, entity, expected, as_of) values
   ('c0000000-0000-4000-8000-000000000001', 'groups',   2,  current_date),
   ('c0000000-0000-4000-8000-000000000001', 'users',    3,  current_date);
 
+-- ---------------------------------------------------------------- ledger (80..)
+-- Chart of accounts + client cost-code vocabulary + baselined budgets for two
+-- projects, one APPROVED change order (moves revised budget), one PENDING
+-- change order (founder approves it in the dogfood), and opening expenses.
+insert into public.ledger_accounts (id, client_id, code, name, type) values
+  ('80000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001', '1000', 'Operating Cash',    'asset'),
+  ('80000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001', '2000', 'Accounts Payable',  'liability'),
+  ('80000000-0000-4000-8000-000000000003', 'c0000000-0000-4000-8000-000000000001', '4000', 'Rental Revenue',    'revenue'),
+  ('80000000-0000-4000-8000-000000000004', 'c0000000-0000-4000-8000-000000000001', '5000', 'Operating Expense', 'expense');
+
+insert into public.ledger_cost_codes (id, client_id, code, label) values
+  ('81000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001', 'maintenance', 'Maintenance & repairs'),
+  ('81000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001', 'capital',     'Capital improvement'),
+  ('81000000-0000-4000-8000-000000000003', 'c0000000-0000-4000-8000-000000000001', 'operations',  'Operations'),
+  ('81000000-0000-4000-8000-000000000004', 'c0000000-0000-4000-8000-000000000001', 'leasing',     'Leasing & turnover');
+
+-- Budgets: Harborview Roof Replacement (the money demo project) + Unit 101.
+insert into public.ledger_budget_lines (id, client_id, project_id, cost_code_id, original_amount, baselined_at) values
+  ('82000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000004', '81000000-0000-4000-8000-000000000002', 120000.00, now()),
+  ('82000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000004', '81000000-0000-4000-8000-000000000001', 15000.00, now()),
+  ('82000000-0000-4000-8000-000000000003', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000001', '81000000-0000-4000-8000-000000000001', 12000.00, now()),
+  ('82000000-0000-4000-8000-000000000004', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000001', '81000000-0000-4000-8000-000000000003', 6000.00, now());
+
+-- CO #1 APPROVED: +$18,000 capital on the roof (revised capital = $138,000).
+insert into public.ledger_change_orders (id, client_id, project_id, number, status, description, created_by, approved_by, approved_at) values
+  ('83000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000004', 1, 'approved', 'Structural upgrade — approved scope add',
+   '10000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', now());
+insert into public.ledger_change_order_lines (change_order_id, cost_code_id, budget_delta) values
+  ('83000000-0000-4000-8000-000000000001', '81000000-0000-4000-8000-000000000002', 18000.00);
+
+-- CO #2 PENDING: +$9,500 maintenance (the dogfood "change a variable" beat).
+insert into public.ledger_change_orders (id, client_id, project_id, number, status, description, created_by) values
+  ('83000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000004', 2, 'pending', 'Dry-rot repair discovered at tear-off',
+   '10000000-0000-4000-8000-000000000001');
+insert into public.ledger_change_order_lines (change_order_id, cost_code_id, budget_delta) values
+  ('83000000-0000-4000-8000-000000000002', '81000000-0000-4000-8000-000000000001', 9500.00);
+
+-- Opening expenses: balanced entries (expense debit / AP credit).
+insert into public.ledger_entries (id, client_id, project_id, source_type, memo, created_by) values
+  ('84000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000004', 'invoice', 'Ridgeline Roofing — mobilization deposit',
+   '10000000-0000-4000-8000-000000000001'),
+  ('84000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001',
+   '40000000-0000-4000-8000-000000000001', 'invoice', 'Bayline Plumbing — disposal line snake',
+   '10000000-0000-4000-8000-000000000001');
+insert into public.ledger_lines (entry_id, account_id, cost_code_id, debit, credit) values
+  ('84000000-0000-4000-8000-000000000001', '80000000-0000-4000-8000-000000000004',
+   '81000000-0000-4000-8000-000000000002', 42500.00, 0),
+  ('84000000-0000-4000-8000-000000000001', '80000000-0000-4000-8000-000000000002', null, 0, 42500.00),
+  ('84000000-0000-4000-8000-000000000002', '80000000-0000-4000-8000-000000000004',
+   '81000000-0000-4000-8000-000000000001', 830.00, 0),
+  ('84000000-0000-4000-8000-000000000002', '80000000-0000-4000-8000-000000000002', null, 0, 830.00);
+
 -- ---------------------------------------------------------------- events (actor variety)
 insert into public.events (client_id, actor_type, actor_id, verb, target_type, target_id, payload, duration_ms) values
   ('c0000000-0000-4000-8000-000000000001', 'user', '10000000-0000-4000-8000-000000000001',

@@ -1,7 +1,8 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: dogfood + merge `rebuild/intake-v1`** (CODE-C intake — 90-second script in the PR description).
+- [ ] **Founder: dogfood + merge `rebuild/ledger-journey-port`** (CODE-E — script in the PR).
+- [ ] **Founder after merge: Vercel project for kg-core?** (your action — fresh token, your terminal).
 
 ## NEXT
 - [ ] **CODE-D: module slots** — fill the gated Journey/Budget rails stubbed in the detail rail.
