@@ -1,7 +1,10 @@
 # tasks.todo.md — kg-core
 
 ## NOW
-- [ ] **Founder: merge `infra/vercel-standup`, then run** `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — one command: creates the `kg-core` Vercel project (scope `the-knowledge-gardens`), pushes the 4 kg-core-dev env vars, deploys `origin/main`, curl-verifies. Rerun after every merge (no auto-deploy while the dashboard is locked out). Runbook: `docs/vercel.md`.
+- [ ] **Founder: dogfood the live app in a browser — <https://kgcore-eight.vercel.app>** (expect: workspace shell renders, grids empty, APIs 401 until Auth0). Redeploy after any merge: `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh`. Runbook incl. domain traps: `docs/vercel.md`.
+- [ ] Founder: want a custom domain (e.g. `core.theknowledgegardens.com`) instead of `kgcore-eight.vercel.app`? Bare `kg-core.vercel.app`/`kgcore.vercel.app` are unavailable (held elsewhere; see runbook).
+- [x] ~~Vercel stand-up~~ LIVE 2026-07-02: project `kgcore` @ `the-knowledge-gardens`, `origin/main` `f962447`, env pushed, verified 200/401.
+- [x] ~~Merge `infra/vercel-standup`~~ merged as PR #4 (`f962447`).
 - [x] ~~Founder: dogfood + merge `rebuild/ledger-journey-port`~~ merged as PR #3 (`950a328`).
 
 ## NEXT

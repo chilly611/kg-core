@@ -2,11 +2,25 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **Vercel stand-up is one command away.** Branch `infra/vercel-standup` adds `scripts/vercel-standup.sh` + `docs/vercel.md`. Founder: merge, then `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — creates project `kg-core` under `the-knowledge-gardens`, pushes the four kg-core-dev env vars (never `DEV_BYPASS`), deploys `origin/main`, verifies. **Merges never auto-deploy** (dashboard locked out) — rerun the script to ship.
+- **kg-core is LIVE: <https://kgcore-eight.vercel.app>** (Vercel project `kgcore` @ `the-knowledge-gardens`, deployed `origin/main` `f962447`, all four kg-core-dev env vars on production+preview). Verified: `/` → 307 → `/workspace` 200 ("Knowledge Gardens — Workspace"), `/api/me` 401 (intended pre-Auth0 posture). Founder: dogfood it in a browser. Redeploy after any merge = `VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh` (no auto-deploy — dashboard still locked out, 2FA passkey).
+- The URL is `kgcore-eight` because bare `kg-core.vercel.app`/`kgcore.vercel.app` are held elsewhere globally and Vercel's domains API records them as yours anyway while the edge 404s them — full traps writeup in `docs/vercel.md`. A custom domain (e.g. `core.theknowledgegardens.com`) sidesteps this whenever wanted.
 - CODE-E merged (PR #3, `950a328`). Dev Supabase `eyvzjofjwbxmryzupfsy` live: migrations + seed applied hosted, SQL tests green over the session pooler (2026-07-02 session).
-- Deployed posture until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
+- Until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
 
 ---
+
+## 2026-07-02 — Stand-up round 2: LIVE at kgcore-eight.vercel.app (Claude Code, autonomous)
+- Real token arrived (`vcp_…` — first paste had lost the leading `v` to the zsh `<` redirect). `whoami` = `chillydahlgren`, team visible. Dashboard confirmed still locked (founder screenshot: passkey 2FA wall) — paste-per-session continues.
+- Script ran clean end-to-end (project create → env ×8 → prod deploy READY)… and then the real saga: **every project domain 404'd at the edge while Vercel's control plane swore `aliasAssigned`, no `aliasError`, PROMOTED.** Generated/alias URLs routed (302 SSO) but project domains never bound. Domain rm/re-add, fresh deploys, delete+recreate under the same name — no fix (recreate made it worse: tombstoned hostnames).
+- **Canary isolation** (throwaway static project): fresh deploy-created project routed fine, its bare auto-domain served 200 → platform healthy, `project add`-created projects + externally-held bare names were the poison. `kg-core.vercel.app` and `kgcore.vercel.app` are held by other accounts globally; the domains API records them as yours (`verified:true`) anyway and the edge 404s forever.
+- **Fix:** recreate deploy-first (deploy from a dir named `kgcore` auto-creates the project and grants an honest domain — `kgcore-eight.vercel.app`), then rerun the stand-up script to push env + redeploy with env baked in. Verified live (200/401/title). Founder repo `.vercel/project.json` linked (`prj_T8ZO5IWGAHzzZfaC1ctgb1rJl6tk`). Canary + poisoned projects deleted; `kgcore` has exactly one domain.
+- Script updated: `PROJECT=kgcore`, real `PROD_ALIAS`, CLI-54 JSON stdout parsing, bootstrap-deploy-first rule documented in the header. Runbook gained a "vercel.app domain traps" section.
+
+## 2026-07-02 — First stand-up run: zsh placeholder trap + invalid token (Claude Code, autonomous)
+- Founder ran `VERCEL_TOKEN=<cp_…` in zsh — the literal `<` from the docs' `VERCEL_TOKEN=<paste>` placeholder is a redirect in zsh, so the shell tried to open the token as a file and the script never ran. Docs placeholder was mine; trap fixed everywhere (`PASTE_TOKEN_HERE`, no angle brackets) and the script now refuses tokens containing `<`/`>` with an explanation.
+- Reran the stand-up in-session with the pasted token: `vercel whoami` → "token is not valid". The earlier "You do not have access to the specified account" on `link --scope the-knowledge-gardens` was the same auth failure surfacing through scope resolution. So: token invalid/expired/incomplete (possibly characters lost around the `<`), or not a Vercel API token.
+- Hardened `scripts/vercel-standup.sh` to fail fast pre-flight: bracket check → `whoami` (invalid-token message) → `projects ls --scope the-knowledge-gardens` (under-scoped-token message naming the Full Account fix). No more confusing scope errors as the first symptom.
+- Open question for founder: if this token was minted today, dashboard access may be restored — that would re-enable git auto-deploy and end the paste-per-session era; worth confirming.
 
 ## 2026-07-02 — Vercel stand-up scripted; deploy is founder-token-gated (Claude Code, autonomous)
 - Task: "stand up Vercel for kg-core." The token is pasted per session (never persisted — see bkg deploy rules) and no token was provided this session, so the authenticated calls can't run here. Everything up to them is done and verified; the stand-up is now one paste-and-run.

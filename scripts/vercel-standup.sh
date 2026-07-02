@@ -6,8 +6,8 @@
 # This script is the whole stand-up AND the redeploy path — auto-deploy on merge
 # is unavailable without the dashboard, so rerun it after every merge to main.
 #
-#   VERCEL_TOKEN=<paste> scripts/vercel-standup.sh            # deploy production
-#   VERCEL_TOKEN=<paste> scripts/vercel-standup.sh --preview  # preview deploy only
+#   VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh            # deploy production
+#   VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh --preview  # preview deploy only
 #
 # What it does, in order:
 #   1. Reads the four runtime env values out of .env.local (the only place
@@ -23,12 +23,24 @@
 # Deployed posture with this env set: UI shell renders; every API returns 401
 # (no Auth0 tenant yet, DEV_BYPASS absent); document uploads go to the private
 # `documents` bucket on kg-core-dev. See docs/vercel.md.
+#
+# Hard-won platform truths (2026-07-02 stand-up):
+# - The project is named `kgcore` and its REAL production domain is
+#   kgcore-eight.vercel.app — auto-granted at first deploy. Bare names
+#   (kg-core.vercel.app, kgcore.vercel.app) are held elsewhere globally: the
+#   domains API will happily record them as yours (verified:true) and the edge
+#   will 404 them forever. Trust only the domain Vercel auto-grants at deploy.
+# - NEVER bootstrap a new project with `vercel project add` + link + deploy —
+#   that path produced projects whose hostnames never bound at the edge.
+#   Create new projects by deploying from a directory named for the project
+#   (deploy-creates-project), then rerun this script to push env + redeploy.
+# - Deleting + recreating a project under the SAME name inherits the breakage.
 
 set -euo pipefail
 
 SCOPE="the-knowledge-gardens"
-PROJECT="kg-core"
-PROD_ALIAS="https://kg-core.vercel.app"
+PROJECT="kgcore"
+PROD_ALIAS="https://kgcore-eight.vercel.app"
 ENV_VARS="NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY DATABASE_URL"
 FORBIDDEN_REF="vlezoyalutexenbnzzui"
 
@@ -39,14 +51,35 @@ MODE="prod"
 [ "${1:-}" = "--preview" ] && MODE="preview"
 
 [ -n "${VERCEL_TOKEN:-}" ] || {
-  echo "VERCEL_TOKEN is required. Paste it inline:" >&2
-  echo "  VERCEL_TOKEN=<token> scripts/vercel-standup.sh" >&2
+  echo "VERCEL_TOKEN is required. Paste it inline (bare token, no brackets or quotes needed):" >&2
+  echo "  VERCEL_TOKEN=PASTE_TOKEN_HERE scripts/vercel-standup.sh" >&2
   exit 1
 }
+case "$VERCEL_TOKEN" in
+  *"<"*|*">"*)
+    echo "VERCEL_TOKEN contains < or > — those were placeholder brackets in the docs." >&2
+    echo "Paste the bare token: VERCEL_TOKEN=cp_xxxx scripts/vercel-standup.sh" >&2
+    echo "(In zsh, an unquoted < also silently redirects — part of the token may have been eaten.)" >&2
+    exit 1 ;;
+esac
 [ -f "$ENV_FILE" ] || { echo "$ENV_FILE not found — fill it from .env.example first." >&2; exit 1; }
 
 vc() { npx --yes vercel@latest "$@" --token "$VERCEL_TOKEN"; }
 env_val() { sed -n "s/^$1=//p" "$ENV_FILE" | head -n 1; }
+
+# Fail fast on auth problems, with errors that name the actual fix.
+WHO="$(vc whoami 2>/dev/null | tail -n 1)" || true
+[ -n "$WHO" ] || {
+  echo "Vercel rejected the token (whoami failed) — it is invalid, expired, or incomplete." >&2
+  echo "Re-copy it from Account Settings -> Tokens (or mint a new one) and paste it bare." >&2
+  exit 1
+}
+echo "Token OK — authenticated as: $WHO"
+vc projects ls --scope "$SCOPE" >/dev/null 2>&1 || {
+  echo "Token works but cannot access team '$SCOPE'." >&2
+  echo "When creating the token, set Scope to 'Full Account' (or one covering $SCOPE), then retry." >&2
+  exit 1
+}
 
 # Fail fast on env problems before touching the network. Values stay out of logs.
 for var in $ENV_VARS; do
@@ -75,10 +108,13 @@ for var in $ENV_VARS; do
 done
 
 if [ "$MODE" = "prod" ]; then
-  URL="$(vc deploy --prod --yes)"
+  DEPLOY_OUT="$(vc deploy --prod --yes)"
 else
-  URL="$(vc deploy --yes)"
+  DEPLOY_OUT="$(vc deploy --yes)"
 fi
+# CLI 54+ writes a JSON object to a non-TTY stdout; older CLIs print a bare URL.
+URL="$(printf '%s\n' "$DEPLOY_OUT" | sed -n 's/.*"url": *"\(https:[^"]*\)".*/\1/p' | head -n 1)"
+[ -n "$URL" ] || URL="$DEPLOY_OUT"
 echo "Deployment URL: $URL"
 
 mkdir -p "$REPO_ROOT/.vercel"
@@ -93,8 +129,10 @@ if [ "$MODE" = "prod" ]; then
   done
   echo "$PROD_ALIAS/workspace -> HTTP $code (expect 200; APIs 401 until Auth0)"
   if [ "$code" != "200" ]; then
-    echo "If the kg-core.vercel.app alias was taken globally, find the real one with:" >&2
-    echo "  npx vercel@latest inspect $URL --scope $SCOPE --token \$VERCEL_TOKEN" >&2
+    echo "Domain may still be propagating (first bind can take ~2 min)." >&2
+    echo "The authoritative domain list is:" >&2
+    echo "  curl -H \"Authorization: Bearer \$VERCEL_TOKEN\" \\" >&2
+    echo "    'https://api.vercel.com/v9/projects/$PROJECT/domains?slug=$SCOPE'" >&2
   fi
 else
   echo "Preview deployments have Vercel Authentication on by default — open in a browser."
