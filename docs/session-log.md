@@ -2,11 +2,20 @@
 *Append-only. Newest entry on top. Keep a NOW block current.*
 
 ## NOW
-- **CODE-E ledger/journey/documents port built** on `rebuild/ledger-journey-port` — PR open, founder dogfoods before merge.
-- After merge: founder decides whether to stand up the Vercel project for kg-core (fresh token, founder's terminal), and whether the dev Supabase project gets created (unlocks Storage + Realtime + Auth0 legs).
-- Remote Supabase: **still not linked** (LOCAL ONLY).
+- **Vercel stand-up is one command away.** Branch `infra/vercel-standup` adds `scripts/vercel-standup.sh` + `docs/vercel.md`. Founder: merge, then `VERCEL_TOKEN=<paste> scripts/vercel-standup.sh` — creates project `kg-core` under `the-knowledge-gardens`, pushes the four kg-core-dev env vars (never `DEV_BYPASS`), deploys `origin/main`, verifies. **Merges never auto-deploy** (dashboard locked out) — rerun the script to ship.
+- CODE-E merged (PR #3, `950a328`). Dev Supabase `eyvzjofjwbxmryzupfsy` live: migrations + seed applied hosted, SQL tests green over the session pooler (2026-07-02 session).
+- Deployed posture until the Auth0 tenant exists: workspace shell renders, every API 401s, data stays behind RLS.
 
 ---
+
+## 2026-07-02 — Vercel stand-up scripted; deploy is founder-token-gated (Claude Code, autonomous)
+- Task: "stand up Vercel for kg-core." The token is pasted per session (never persisted — see bkg deploy rules) and no token was provided this session, so the authenticated calls can't run here. Everything up to them is done and verified; the stand-up is now one paste-and-run.
+- **Proved `origin/main` (950a328) builds for production**: clean `git archive` → `npm ci` → `next build` with the real kg-core-dev env (minus `DEV_BYPASS`). Green. `/workspace` + `/workspace/import` prerender static (no build-time DB); all `/api/*` dynamic.
+- **`scripts/vercel-standup.sh`** (macOS bash-3.2-safe): env-guards first (aborts on missing vars or anything resolving to `vlezoyalutexenbnzzui`; only the fixed 4-var list is ever pushed, so `DEV_BYPASS` structurally can't leak), snapshots `origin/main` to a temp dir, `project add` → `link` → `env rm/add` (production+preview, idempotent) → `deploy`, copies `.vercel/project.json` back (gitignored), curl-verifies the prod alias. `--preview` flag for non-prod runs.
+- **Dry-ran the whole script** against a stubbed `vercel` CLI: call sequence correct, deploy URL captured, link copy-back works, forbidden-ref guard refuses (exit 1). Token guard refuses when `VERCEL_TOKEN` unset.
+- **`docs/vercel.md`** runbook: identity (project `kg-core`, scope `the-knowledge-gardens`), CLI-only reality, env table, deployed posture pre-Auth0 (shell 200 / APIs 401 / uploads → private `documents` bucket), verify commands.
+- Alias check: `kg-core.vercel.app` currently serves Vercel's 404 — global alias likely free.
+- Flagged for after Auth0 lands: add `AUTH0_*` to the script's env list + `APP_BASE_URL` for the prod domain.
 
 ## 2026-07-02 — CODE-E: BKG primitives ported onto the core model (Claude Code, autonomous)
 - **Ledger** ported from bkg `feat/one-loop-ledger` (61eff69): double-entry journal with the deferrable Σdebit=Σcredit constraint trigger, approved-COs-move-budget invariant, reversal-not-delete, `ledger_assert_reconcile` (raise before rendering a bad number). Adapted: public schema + client_id RLS keyed on core projects.id; cost codes are CLIENT VOCABULARY (`ledger_cost_codes`), not MasterFormat; rollup caches DROPPED (they existed only for Realtime broadcast — truth is the view; poll seam until hosted Supabase). Commitments/ETC/hash-chain deferred. Test 05: 8 assertions incl. unbalanced-write rejection + client isolation.
